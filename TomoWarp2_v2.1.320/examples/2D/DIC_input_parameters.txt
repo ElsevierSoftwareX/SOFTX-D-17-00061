@@ -1,0 +1,15 @@
+Advanced = 1
+images_2D = 1
+
+DIR_image1 = './examples/2D'
+DIR_image2 = './examples/2D'
+DIR_out = './examples/2D/Results'
+
+search_window = [[0, 0], [-1, 6], [-7, 1]]
+node_spacing = [1, 5, 5]
+correlation_window = [0, 5, 5]
+
+ROI_corners = [[0, 200, 190], [0, 875, 515]]
+grey_low_threshold = 43.0
+
+kinematics_median_filter = 3

@@ -1,0 +1,251 @@
+import os, sys
+from Tkinter import *
+import Tkconstants, tkFileDialog, tkMessageBox
+
+from guiFunctions import *
+
+from Frames import *
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../tools/"))
+from print_variable import *
+
+
+class Optional_setup(Frame):
+
+
+    coordLabelExt = ( 'z low', 'z high', 'y low', 'y high', 'x low', 'x high' )
+    #coordLabel = ( 'z', 'y', 'x' )
+    interpLabel = ( '3_CC', '2_II', '1_II' )
+    variables = {}
+
+    def choose_file( self ):
+        from minimalFrame import Minimal_setup
+        self.variables['prior_file'].set( tkFileDialog.askopenfilename( parent=self.master, initialdir=Minimal_setup.variables['DIR_out'].get(), title='Please select a priof file' ) )
+
+    def createWidgets(self):
+
+        self.labelWidth = 15
+        self.entryWidth = 15
+        self.buttonWidth = 5
+
+        currentRow = 0
+
+        Label(self, text="Optional Parameters", font=("bold")).grid(row=currentRow, column=0, columnspan=7, pady = 10 )
+        currentRow += 1
+
+        Label( self, text="Image 1 filter", width=self.labelWidth, anchor=W               ).grid( row=currentRow,   column=0, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.variables['image_1_filter'], width=self.entryWidth ).grid( row=currentRow,   column=1, sticky=W+E, padx=5, columnspan = 2 )
+        Label( self, text="Image 2 filter", width=self.labelWidth, anchor=W               ).grid( row=currentRow,   column=3, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.variables['image_2_filter'], width=self.entryWidth ).grid( row=currentRow,   column=4, sticky=W+E, padx=5, columnspan = 2 )
+        Label( self, text="Images extension", width=self.labelWidth, anchor=E             ).grid( row=currentRow,   column=6, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.variables['image_ext'], width=self.entryWidth      ).grid( row=currentRow+1, column=6, sticky=W+E, padx=5 )
+        self.grid_rowconfigure(currentRow, pad=2)
+        currentRow += 1
+
+        Label( self, text="Image 1 digits", width=self.labelWidth, anchor=W               ).grid( row=currentRow, column=0, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.variables['image_1_digits'], width=self.entryWidth ).grid( row=currentRow, column=1, sticky=W+E, padx=5 )
+        Label( self, text="Image 2 digits", width=self.labelWidth, anchor=W               ).grid( row=currentRow, column=3, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.variables['image_2_digits'], width=self.entryWidth ).grid( row=currentRow, column=4, sticky=W+E, padx=5 )
+        currentRow += 1
+        
+        Label( self, text="Output filename", width=self.labelWidth, anchor=W            ).grid( row=currentRow, column=0, sticky=W,   padx=5, pady=(10,0) )
+        Entry( self, textvariable=self.variables['output_name']                         ).grid( row=currentRow, column=1, sticky=W+E, padx=5, pady=(10,0), columnspan=5)
+        Checkbutton( self, text="Print CC as %", variable=self.variables['cc_percent']  ).grid( row=currentRow, column=6, sticky=W,   padx=5, pady=(10,0) )
+        self.grid_rowconfigure(currentRow, pad=2)
+        currentRow += 1
+
+        Label( self, text="Sample", width=self.labelWidth, anchor=W                     ).grid( row=currentRow, column=0, sticky=W,   padx=5, pady=(0,10) )
+        Entry( self, textvariable=self.variables['name_prefix'], width=self.entryWidth  ).grid( row=currentRow, column=1, sticky=W+E, padx=5, pady=(0,10) )
+        Label( self, text="name test 1", width=self.labelWidth, anchor=W                ).grid( row=currentRow, column=2, sticky=W,   padx=5, pady=(0,10) )
+        Entry( self, textvariable=self.variables['name_1'], width=self.entryWidth       ).grid( row=currentRow, column=3, sticky=W+E, padx=5, pady=(0,10) )
+        Label( self, text="name test 2", width=self.labelWidth, anchor=W                ).grid( row=currentRow, column=4, sticky=W,   padx=5, pady=(0,10) )
+        Entry( self, textvariable=self.variables['name_2'], width=self.entryWidth       ).grid( row=currentRow, column=5, sticky=W+E, padx=5, pady=(0,10) )
+        self.grid_rowconfigure(currentRow, pad=2)
+        currentRow += 1
+
+        Label( self, text="ROI corners image 1", width=self.labelWidth, anchor=W ).grid( row=currentRow+1, column=0, sticky=W, padx=5 )
+        entries_row(self, self.variables['ROI_1_corners'], currentRow+1, width=self.entryWidth)
+        self.grid_rowconfigure(currentRow, pad=2)
+        currentRow += 2
+        
+        Label( self, text="ROI corners image 2", width=self.labelWidth, anchor=W ).grid( row=currentRow+1, column=0, sticky=W, padx=5 )
+        entries_row(self, self.variables['ROI_2_corners'], currentRow+1, pritnLabel=False, width=self.entryWidth)
+        self.grid_rowconfigure(currentRow, pad=2)
+        currentRow += 2
+
+
+        Label( self, text="Prior file", width=self.labelWidth, anchor=W             ).grid( row=currentRow, column=0, sticky=W,   padx=5, pady=10 )
+        Entry( self, textvariable=self.variables['prior_file']                      ).grid( row=currentRow, column=1, sticky=W+E, padx=5, pady=10, columnspan=5)
+        Button(self, text="Browse",command=self.choose_file, width=self.buttonWidth ).grid( row=currentRow, column=6, sticky=W  , padx=5, pady=10 )
+        self.grid_rowconfigure(currentRow, pad=2)
+        currentRow += 2
+
+        Label( self, text="Memory limit (MB)", width=self.labelWidth, anchor=W            ).grid( row=currentRow, column=0, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.variables['memLimitMB'], width=self.entryWidth     ).grid( row=currentRow, column=1, sticky=W+E, padx=5 )
+        Label( self, text="Number of CPUs", width=self.labelWidth, anchor=W               ).grid( row=currentRow, column=2, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.variables['nWorkers'], width=self.entryWidth       ).grid( row=currentRow, column=3, sticky=W+E, padx=5 )
+        Label( self, text="Grey threshold", width=self.labelWidth, anchor=W                ).grid( row=currentRow,   column=4, sticky=W,   padx=5 )
+        Label( self, text="Low:", width=self.labelWidth, anchor=W                              ).grid( row=currentRow-1, column=5, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.variables['grey_low_threshold'], width=self.entryWidth  ).grid( row=currentRow,   column=5, sticky=W+E, padx=5 )
+        Label( self, text="High:", width=self.labelWidth, anchor=W                             ).grid( row=currentRow-1, column=6, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.variables['grey_high_threshold'], width=self.entryWidth ).grid( row=currentRow,   column=6, sticky=W+E, padx=5 )
+        self.grid_rowconfigure(currentRow, pad=2)
+        currentRow += 1
+
+        Label( self, text="Subpixel refinment mode", anchor=W ).grid( row=currentRow, column=0, columnspan=2, sticky=W, padx=5, pady=( 10, 0 ) )
+        currentRow += 1
+        self.spCheck_CC  = Checkbutton( self, text="Correlation Coefficient",        variable=self.variables['subpixel_mode'][self.interpLabel[0]] )
+        self.spCheck_IIt = Checkbutton( self, text="Image Interpolator translation", variable=self.variables['subpixel_mode'][self.interpLabel[1]] )
+        self.spCheck_IIt.config( command=self.subpixelMode, state='disabled')
+        self.spCheck_IIr = Checkbutton( self, text="Image Interpolator rotation",    variable=self.variables['subpixel_mode'][self.interpLabel[2]] )
+        self.subpixelMode()
+        self.spCheck_CC.grid(  row=currentRow, column=0, columnspan=2, sticky=W )
+        self.spCheck_IIt.grid( row=currentRow, column=2, columnspan=2, sticky=W )
+        self.spCheck_IIr.grid( row=currentRow, column=4, columnspan=2, sticky=W )
+        self.grid_rowconfigure(currentRow, pad=2)
+
+        Button(self, text="Advanced setting",command=lambda: Advanced_setup ( master=self ), width=self.labelWidth ).grid( row=currentRow, column=6, sticky=W  , padx=5 )
+        
+        currentRow += 1
+
+    def subpixelMode( self ):
+
+        if self.variables['subpixel_mode'][self.interpLabel[1]].get():
+            self.spCheck_IIr.config( state='normal')
+        else:
+            variable=self.variables['subpixel_mode'][self.interpLabel[2]].set(0)
+            self.spCheck_IIr.config( state='disabled')
+
+    def buid_ouputfilename( self, *args ):
+
+        self.variables['output_name'].set( self.variables['name_prefix'].get() + "-" +\
+                                           self.variables['name_1'].get() + "-" + self.variables['name_2'].get() )
+
+    def creatVariables(self):
+
+        stringList = [ 'name_prefix','name_1', 'name_2', 'output_name', 'image_1_filter', 'image_2_filter',\
+                       'image_ext', 'prior_file', 'subpixel_II_optimisation_mode' ]
+
+        for field in stringList:
+          self.variables[field] = StringVar()
+          self.variables[field].set(self.data[field])
+
+        intList = [ 'memLimitMB', 'nWorkers', 'image_1_digits', 'image_2_digits', 'cc_percent', 'subpixel_CC_max_refinement_step', \
+                    'subpixel_CC_max_refinement_iterations', 'subpixel_II_interpolation_order']
+
+        for field in intList:
+          self.variables[field] = IntVar()
+          self.variables[field].set(self.data[field])
+
+        floatList = ['grey_low_threshold', 'grey_high_threshold', 'subpixel_CC_refinement_step_threshold']
+
+        for field in floatList:
+          self.variables[field] = DoubleVar()
+          self.variables[field].set(self.data[field])
+
+        dictionariesList = ['subpixel_mode']
+
+        for dictField in dictionariesList:
+          try:
+              self.variables[dictField] = index2coord(self.data[dictField], self.interpLabel)
+          except:
+            self.variables[dictField]={}
+            for field in self.interpLabel:
+              self.variables[dictField][field] = IntVar()
+              self.variables[dictField][field].set( self.data[dictField] )
+
+        #dictionariesList = []
+
+        #for dictField in dictionariesList:
+          #if type(self.data[dictField]) is list:
+              #self.variables['Advanced'].set(1)
+              #self.variables[dictField] = index2coord(self.data[dictField], self.coordLabel)
+          #else:
+            #self.variables[dictField]={}
+            #for field in self.coordLabel:
+              #self.variables[dictField][field] = IntVar()
+              #self.variables[dictField][field].set( self.data[dictField] )
+
+        dictionariesList = ['ROI_1_corners', 'ROI_2_corners']
+
+        for dictField in dictionariesList:
+          try:
+                                    # map+zip convert ROI_corners structure to [[zl,zh],[yl,yh],[xl,xh]]
+              self.variables[dictField] = index2coord( map( list, zip(*self.data[dictField]) ), self.coordLabelExt)
+          except:
+            self.variables[dictField]={}
+            for field in self.coordLabelExt:
+              self.variables[dictField][field] = IntVar()
+              self.variables[dictField][field].set( self.data[dictField] )
+
+        self.variables[ 'name_prefix' ].trace( 'w', self.buid_ouputfilename)
+        self.variables[ 'name_1'      ].trace( 'w', self.buid_ouputfilename)
+        self.variables[ 'name_2'      ].trace( 'w', self.buid_ouputfilename)
+
+    def __init__(self, master=None):
+
+        Frame.__init__(self, master)
+
+        for idx in range(12):
+          self.grid_rowconfigure(idx, weight=1)
+        for idx in range(7):
+            self.grid_columnconfigure(idx, weight=1)
+            
+        self.configure( bd=1, relief=SUNKEN)
+        self.creatVariables()
+        self.createWidgets()
+
+    #def open_advanced( self ):
+      
+        #Advanced_setup ( master=self )
+
+
+class Advanced_setup( Toplevel ):
+
+    def __init__(self, master=None):
+
+        Toplevel.__init__(self, master)
+
+        for idx in range(7):
+            self.grid_rowconfigure(   idx, weight=1)
+            self.grid_columnconfigure(idx, weight=1)
+
+        self.configure( bd=1, relief=SUNKEN)
+        self.formatList = ['fmin']
+        self.createWidgets()
+        centre_win( self )
+
+        
+    def createWidgets( self ):
+
+        self.labelWidth = 20
+        self.entryWidth = 15
+        self.buttonWidth = 5
+
+        currentRow = 0
+
+        Label( self, text="Correlation Coefficient Parameters:" ).grid(row=currentRow, column=0, columnspan=2, padx=5, pady=(10,5))
+        currentRow += 1
+
+        Label( self, text="Max Refinement Step", width=self.labelWidth, anchor=W                                        ).grid( row=currentRow, column=0, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.master.variables['subpixel_CC_max_refinement_step'], width=self.entryWidth       ).grid( row=currentRow, column=1, sticky=W+E, padx=5, columnspan = 2 )
+        currentRow += 1
+        Label( self, text="Refinement Step Threshold", width=self.labelWidth, anchor=W                                  ).grid( row=currentRow, column=0, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.master.variables['subpixel_CC_refinement_step_threshold'], width=self.entryWidth ).grid( row=currentRow, column=1, sticky=W+E, padx=5, columnspan = 2 )
+        currentRow += 1
+        Label( self, text="Max Refinement Iterations", width=self.labelWidth, anchor=W                                  ).grid( row=currentRow, column=0, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.master.variables['subpixel_CC_max_refinement_iterations'], width=self.entryWidth ).grid( row=currentRow, column=1, sticky=W+E, padx=5 )
+        currentRow += 1
+        
+        Label( self, text="Image Interpolator Parameters:" ).grid(row=currentRow, column=0, columnspan=2, padx=5, pady=(10,5))
+        currentRow += 1
+
+        Label( self, text="Interpolation Order", width=self.labelWidth, anchor=W                                  ).grid( row=currentRow, column=0, sticky=W,   padx=5 )
+        Entry( self, textvariable=self.master.variables['subpixel_II_interpolation_order'], width=self.entryWidth ).grid( row=currentRow, column=1, sticky=W+E, padx=5, columnspan = 2 )
+        currentRow += 1
+        Label( self, text="Optimisation Mode", width=self.labelWidth, anchor=W                                    ).grid( row=currentRow, column=0, sticky=W,   padx=5 )
+        OptionMenu( self, self.master.variables['subpixel_II_optimisation_mode'], *self.formatList                ).grid( row=currentRow, column=1, sticky=W+E, padx=5, columnspan = 2 )
+        currentRow += 1
+        
+        Button(self,text="Close",command=self.destroy).grid( row=currentRow, column=1, sticky=E, padx=5, pady=(10,5) )
+        currentRow += 1

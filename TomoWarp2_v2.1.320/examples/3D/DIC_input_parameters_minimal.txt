@@ -1,0 +1,6 @@
+DIR_image1 = './examples/3D/Intact'
+DIR_image2 = './examples/3D/Deformed'
+DIR_out = './examples/3D/Results'
+correlation_window = 2
+node_spacing = 10
+search_window = 8

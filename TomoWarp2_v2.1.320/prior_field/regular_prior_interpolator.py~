@@ -1,0 +1,152 @@
+# -*- coding: utf-8 -*-
+
+# =========================================
+# ============== TomoWarp II ==============
+# =========================================
+# ------------------------------------------
+# ---- Part A - Prior Field Calculation ----
+# ------------------------------------------
+
+# ... Regular Prior Interpolator ...
+
+# Date created: 2013-08-20
+
+# Authors: Edward Andò, Erika Tudisco, Stephen Hall
+
+# This function is responsible for interpolating the prior guesses between two different regularly spaced grids
+
+# INPUTs:
+#  1. Prior array with guesses (old)
+#  2. Prior array without guesses (new node spacing)
+#  Added by Erika on 2013-10-07
+#  3. Smoothing mode (Boolean: if set to true a median filter is applied before interpolation)
+
+# OUTPUTS:
+#  1. Interpolated new prior array
+
+import os, sys, scipy
+import numpy
+from scipy import ndimage
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../tools/"))
+from calculate_node_spacing import *
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "prior_field/"))
+from prior_median_filter import median_filter_nans
+
+
+def regular_prior_interpolator( old_prior, new_prior, smoothing=False ):
+  
+  # 2013-08-22 - Calculation of node spacing moved to ./tools/calculate_node_spacing.py
+  old_nodes_z, old_nodes_y, old_nodes_x = calculate_node_spacing( old_prior[ :, 1:4 ] )
+  #print "    -> regular_prior_interpolator: Prior node positions are (z,y,x):\n\t", old_nodes_z, "\n\t", old_nodes_y, "\n\t", old_nodes_x
+  
+  # Figure out spacing from first two nodes positions
+  old_z_spacing = old_nodes_z[1] - old_nodes_z[0]
+  old_y_spacing = old_nodes_y[1] - old_nodes_y[0]
+  old_x_spacing = old_nodes_x[1] - old_nodes_x[0]
+  print "    -> regular_prior_interpolator: Prior node spacing (z,y,x) is:\n\t%i, %i, %i"%( old_z_spacing, old_y_spacing, old_x_spacing )
+
+  # Reshape prior field to a three dimensional arrays
+  z_field = old_prior[ :, 4 ].reshape( ( len(old_nodes_z), len(old_nodes_y), len(old_nodes_x) ) )
+  y_field = old_prior[ :, 5 ].reshape( ( len(old_nodes_z), len(old_nodes_y), len(old_nodes_x) ) )
+  x_field = old_prior[ :, 6 ].reshape( ( len(old_nodes_z), len(old_nodes_y), len(old_nodes_x) ) )
+
+  if smoothing:
+      print "    -> regular_prior_interpolator: Smoothing kinematics field"
+      # 2014-07-18 -- Edward Ando
+      # Changing the median filter for the field from scipy.ndimage.filters.median_filter
+      #   (which seems to propagate NaNs) to our own, home-developed median filter:
+      z_field = median_filter_nans( z_field, 3 )
+      y_field = median_filter_nans( y_field, 3 )
+      x_field = median_filter_nans( x_field, 3 )
+
+  # Normalise coordinates of new prior nodes positions
+  #   (subtract position of old top corner and divide by old node spacing), to get into the SHAPE => SIZE
+  #   of the old prior for interpolation.
+  new_prior_normalised = numpy.zeros( (new_prior.shape[0], 3) )
+  new_prior_normalised[ :, 0 ] = ( new_prior[ :, 1 ] - old_nodes_z[0] ) / old_z_spacing
+  new_prior_normalised[ :, 1 ] = ( new_prior[ :, 2 ] - old_nodes_y[0] ) / old_y_spacing
+  new_prior_normalised[ :, 2 ] = ( new_prior[ :, 3 ] - old_nodes_x[0] ) / old_x_spacing
+
+
+  # Interpolate each prior field for each new node
+  # 2014-07-23 Edward Andò:
+  #   map_coordinates does not handle NaNs, and cannot handle masked arrays for the moment,
+  #   ...so we will seek and destroy the NaNs in the displacement fields before doing a map_coordinates
+  # This means for each NaN position, we will grow a window until we get a real value,
+  #   and then we'll use that window do make a median to fill in our NaN measurement.
+
+  # Figure out NaN positions... (they will be in the same place for every field)
+  nan_positions = numpy.where( numpy.isnan( x_field ) )
+
+  # A mask of ones and zeros in order to quickly work out the smallest window size for the filter
+  mask          = numpy.ones( ( len(old_nodes_z), len(old_nodes_y), len(old_nodes_x) ), dtype = 'bool' )
+  mask[nan_positions] = False
+
+  number_of_nans = len( nan_positions[0] )
+
+  if number_of_nans > 0:
+      print "    -> regular_prior_interpolator: %i NaNs detected, replacing them with a median value of the smallest window that touches real data"%( number_of_nans )
+  
+  for nan_number in range( number_of_nans ):
+      z = nan_positions[0][nan_number]
+      y = nan_positions[1][nan_number]
+      x = nan_positions[2][nan_number]
+
+      z_top = z
+      y_top = y
+      x_top = x
+      
+      z_bot = z
+      y_bot = y
+      x_bot = x
+
+      window_sum = 0
+      step  = 0
+
+      
+      while window_sum == 0:
+            step += 1
+            #print "step = ", step
+            if z_top >= 0: z_top -= step
+            if y_top >= 0: y_top -= step
+            if x_top >= 0: x_top -= step
+
+            if z_bot <= len(old_nodes_z): z_bot += step
+            if y_bot <= len(old_nodes_y): y_bot += step
+            if x_bot <= len(old_nodes_x): x_bot += step
+
+            window_sum = numpy.sum(   mask[ z_top:z_bot+1,\
+                                            y_top:y_bot+1,\
+                                            x_top:x_bot+1   ] )
+
+            local_mask = numpy.where( mask[ z_top:z_bot+1,\
+                                            y_top:y_bot+1,\
+                                            x_top:x_bot+1   ] )
+
+      z_field[ z, y, x ] = numpy.median( z_field[ z_top:z_bot+1,\
+                                                  y_top:y_bot+1,\
+                                                  x_top:x_bot+1   ][local_mask] )
+      y_field[ z, y, x ] = numpy.median( y_field[ z_top:z_bot+1,\
+                                                  y_top:y_bot+1,\
+                                                  x_top:x_bot+1   ][local_mask] )
+      x_field[ z, y, x ] = numpy.median( x_field[ z_top:z_bot+1,\
+                                                  y_top:y_bot+1,\
+                                                  x_top:x_bot+1   ][local_mask] )
+
+  #z_field_masked = numpy.ma.masked_array( z_field, numpy.isnan(z_field) )
+  #z_field[ numpy.where( numpy.isnan( z_field ) ) ] = 0
+  #y_field[ numpy.where( numpy.isnan( y_field ) ) ] = 0
+  #x_field[ numpy.where( numpy.isnan( x_field ) ) ] = 0
+
+  new_z_field = ndimage.map_coordinates( z_field, new_prior_normalised.T, order=1, mode='nearest', prefilter=False ).T
+  new_y_field = ndimage.map_coordinates( y_field, new_prior_normalised.T, order=1, mode='nearest' ).T
+  new_x_field = ndimage.map_coordinates( x_field, new_prior_normalised.T, order=1, mode='nearest' ).T
+  
+  # Update and return new prior guesses array
+  new_prior[ :, 4 ] = new_z_field
+  new_prior[ :, 5 ] = new_y_field
+  new_prior[ :, 6 ] = new_x_field
+  
+  return new_prior
