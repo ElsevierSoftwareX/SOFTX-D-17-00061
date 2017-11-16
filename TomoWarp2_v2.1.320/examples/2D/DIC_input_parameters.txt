@@ -5,6 +5,9 @@ DIR_image1 = './examples/2D'
 DIR_image2 = './examples/2D'
 DIR_out = './examples/2D/Results'
 
+image_1_filter = 'Intact'
+image_2_filter = 'Deformed'
+
 search_window = [[0, 0], [-1, 6], [-7, 1]]
 node_spacing = [1, 5, 5]
 correlation_window = [0, 5, 5]
