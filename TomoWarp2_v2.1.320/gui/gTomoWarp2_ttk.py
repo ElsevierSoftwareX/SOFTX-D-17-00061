@@ -100,7 +100,8 @@ def loadFile( root, inputFile=None, data={} ):
         #if inputFile==None: inputFile = tkFileDialog.askopenfilename(parent=root, title='Choose a file', initialdir=root.minimal.variables['DIR_out'].get())
         if not ( inputFile=='' or inputFile == () ):
           root.homeDir =  os.path.dirname(inputFile)
-          logging.log.info( pv( [inputFile], '', False ) )
+          try: logging.log.info( pv( [inputFile], '', False ) ); 
+          except: print pv( [inputFile], '', False )
           data = input_parameters_read( inputFile, data )
           data = required_parameters(data)
           # If existing the frames are destroyed
@@ -110,10 +111,12 @@ def loadFile( root, inputFile=None, data={} ):
           except:
             pass
     except IOError as exc:
-        logging.log.warning( exc )
+        try: logging.log.warning( exc ); 
+        except: print exc
         ShowInfo( root, "TomoWarp2 Error", 'File not found' )
     except:
-        logging.log.warning( 'File not recognized' )
+        try: logging.log.warning( 'File not recognized' ); 
+        except: print 'File not recognized'
         ShowInfo( root, "TomoWarp2 Error", 'File not recognized' )
         
     # Frames are created

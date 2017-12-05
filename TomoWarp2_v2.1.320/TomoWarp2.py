@@ -124,7 +124,8 @@ if __name__ == "__main__":
           print '\nInput file is "%s"\n'%( inputfile )
           data = input_parameters_read( inputfile, data )
         except Exception as exc:
-          logging.err.error( exc )
+          try: logging.err.error( exc )
+          except: print  exc 
           sys.exit(2)
         
         try:
@@ -141,4 +142,5 @@ if __name__ == "__main__":
           tomowarp_runfile( data )
         except Exception as exc:
           #logging.err.debug( traceback.format_exc() )
-          logging.err.error( exc.message )
+          try: logging.err.error( exc.message )
+          except: print  exc.message 

@@ -103,7 +103,8 @@ def process_results(  kinematics, data ):
     # Remove outliers
     if data.remove_outliers_filter_size != None:
       if data.remove_outliers_filter_size > 0:
-          logging.log.info("process_results(): Removing outliers")#%0.1f (3 means ±1)"%( data.kinematics_median_filter )
+          try: logging.log.info("process_results(): Removing outliers") 
+          except: print "process_results(): Removing outliers"
           try:
             #kinematics[ :, 4:10 ] = data.kinematics_median_filter_fnc( kinematics[ :, 1:4 ], kinematics[ :, 4:10 ], data.kinematics_median_filter )
             [ kinematics[ :, 4:10 ], mask_outliers ] = kinematics_remove_outliers( kinematics[ :, 1:4 ], kinematics[ :, 4:10 ], \
@@ -111,19 +112,21 @@ def process_results(  kinematics, data ):
             #mask[ numpy.where(mask_outliers==1) ] = 0
             mask[ numpy.isfinite(kinematics[:,4]) ] = 0
           except Exception as exc:
-            logging.log.warn(exc.message)
+            try: logging.log.warn(exc.message)
+            except: print exc.message
             pass
 
     # filter kinematics...
     if data.kinematics_median_filter != None:
       if data.kinematics_median_filter > 0:
-          logging.log.info("process_results(): Applying a Kinematics Median filter of {:0.1f} (3 means ±1)".format( data.kinematics_median_filter ))
+          try: logging.log.info("process_results(): Applying a Kinematics Median filter of {:0.1f} (3 means ±1)".format( data.kinematics_median_filter ))
+          except: print "process_results(): Applying a Kinematics Median filter of {:0.1f} (3 means ±1)".format( data.kinematics_median_filter )
           try:
             kinematics[ :, 4:10 ] = kinematics_median_filter_fnc( kinematics[ :, 1:4 ], kinematics[ :, 4:10 ], data.kinematics_median_filter )
             mask[ numpy.isfinite(kinematics[:,4]) ] = 0
           except Exception as exc:
-            logging.log.warn(exc.message)
-            pass
+            try: logging.log.warn(exc.message)
+            except: print exc.message
 
     if data.pixel_size_ratio != 1:
       if data.image_centre is not None:
@@ -131,7 +134,8 @@ def process_results(  kinematics, data ):
       else:
           raise Exception('Image centre needed to correct pixel size ratio')
 
-    logging.log.info( "Writing output files to {}/{}".format( data.DIR_out, data.output_name ) )
+    try: logging.log.info( "Writing output files to {}/{}".format( data.DIR_out, data.output_name ) )
+    except: print "Writing output files to {}/{}".format( data.DIR_out, data.output_name )
 
     if data.saveTIFF:
       if data.saveError: imsave( data.DIR_out + "/%s-error-field-%04ix%04ix%04i.tif"%( data.output_name, len(nodes_x), len(nodes_y), len(nodes_z) ), kinematics[ :, 11 ].reshape( ( len(nodes_z), len(nodes_y), len(nodes_x) ) ).astype( '<f4' ) )
@@ -250,11 +254,13 @@ def process_results(  kinematics, data ):
               
               try:
                 if interpolate_strain:
-                    logging.log.info("Interpolation of %s into a regular grid to save TIF/RAW. This can take some time..."%(component[1]))
+                    try: logging.log.info("Interpolation of %s into a regular grid to save TIF/RAW. This can take some time..."%(component[1]))
+                    except: print "Interpolation of %s into a regular grid to save TIF/RAW. This can take some time..."%(component[1])
                     strain_components_int[ component[1] ] = numpy.ones_like( mask )*numpy.nan  
                     strain_components_int[ component[1] ][ numpy.where( ~numpy.isnan(mask) ) ] = griddata( coordinates, strain_components[ component[1] ], kinematics[ numpy.where( ~numpy.isnan( mask ) ), 1:4 ] )
                     strain_components[     component[1] ] = strain_components_int[ component[1] ].reshape( ( len( nodes_z ), len( nodes_y ), len( nodes_x ) ) )
-                    logging.log.info("Interpolation done!")
+                    try: logging.log.info("Interpolation done!")
+                    except: print "Interpolation done!"
                   
                 if data.saveTIFF or data.saveRAW:
                   dimZ = strain_components[ component[1] ].shape[0]
@@ -265,7 +271,8 @@ def process_results(  kinematics, data ):
                 if data.saveRAW:  strain_components[ component[1] ].astype( '<f4' ).tofile( data.DIR_out + "/%s-%s_strain-field-%04ix%04ix%04i.raw"%( data.output_name, component[1], dimX, dimY, dimZ) )
               
               except:
-                logging.log.warn("Warning: it was not possible to interpolate %s strain"%(component[1]))
+                try: logging.log.warn("Warning: it was not possible to interpolate %s strain"%(component[1]))
+                except: print "Warning: it was not possible to interpolate %s strain"%(component[1])
                       
         if data.saveRotFromStrain:
           # 2014-10-13 EA: calculation of rotation
@@ -290,12 +297,14 @@ def process_results(  kinematics, data ):
               if len(strain.shape) == 5 :
                   imsave( data.DIR_out + "/%s-rot_angle-%04ix%04ix%04i.tif"%( data.output_name, dimX, dimY, dimZ), RotAngle.astype( '<f4' ) )
               else:
-                  logging.log.warn("Warning: Strain not in a regular grid. Can not write TIFF")
+                  try: logging.log.warn("Warning: Strain not in a regular grid. Can not write TIFF")
+                  except: print "Warning: Strain not in a regular grid. Can not write TIFF"
           if data.saveRAW:
               if len(strain.shape) == 5 :
                   RotAngle.astype( '<f4' ).tofile( data.DIR_out + "/%s-rot_angle-%04ix%04ix%04i.raw"%( data.output_name, dimX, dimY, dimZ) )
               else:
-                  print("Warning: Strain not in a regular grid. Can not write RAW")
+                  try: logging.log.warn("Warning: Strain not in a regular grid. Can not write RAW")
+                  except: print "Warning: Strain not in a regular grid. Can not write RAW"
           if data.saveVTK:
               #WriteVTK_data( data.DIR_out + "/%s.vtk"%( data.output_name ), 'rot_angle', RotAngle )
               pass

@@ -45,9 +45,12 @@ def input_parameters( data ):
     data = image_finder_data( data )
     data = image_size_and_type( data )
 
-    logging.log.info("\nInput parameters:")
+    try: logging.log.info("\nInput parameters:")
+    except: print "\nInput parameters:"
     for key in sorted( data.iterkeys() ):
-      logging.log.info( pv([data[key]],'\t',False,key, _print=False) )
-    logging.log.info('\n')
+      try: logging.log.info( pv([data[key]],'\t',False,key, _print=False) )
+      except: print pv([data[key]],'\t',False,key, _print=False) 
+    try: logging.log.info('\n')
+    except: print '\n'
 
     return data

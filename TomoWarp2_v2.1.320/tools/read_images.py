@@ -46,12 +46,14 @@ def read_raw_3D( image_data_format, image_size, base_dir, raw_base_name, extensi
     import numpy
     
     filename = "%s/%s%s"%( base_dir, raw_base_name, extension )
-    logging.log.debug( "read_raw_3D: Loading Full Volume: %s"%(filename) )
+    try: logging.log.debug( "read_raw_3D: Loading Full Volume: %s"%(filename) )
+    except: print "read_raw_3D: Loading Full Volume: %s"%(filename) 
 
     try:
       outputVolume = numpy.fromfile( filename, dtype=image_data_format )
     except:
-      logging.log.warning( "read_raw_slices(): File %s not found "%filename )
+      try: logging.log.warning( "read_raw_slices(): File %s not found "%filename )
+      except: print  "read_raw_slices(): File %s not found "%filename 
       outputVolume = []
       
     try:
@@ -101,7 +103,8 @@ def read_raw_slices( image_data_format, image_size, base_dir, raw_base_name, dig
               filename = "%s/%s%0*i%s"%( base_dir, raw_base_name, int(digits), sliceNumber + slices_range[0], extension )
             currentImage = numpy.fromfile( filename, dtype=image_data_format )
         except:
-            logging.log.warning( "read_raw_slices(): File %s not found "%filename )
+            try: logging.log.warning( "read_raw_slices(): File %s not found "%filename )
+            except: print "read_raw_slices(): File %s not found "%filename 
             currentImage = []
 
         try:
@@ -112,10 +115,7 @@ def read_raw_slices( image_data_format, image_size, base_dir, raw_base_name, dig
             else:
                 outputVolume[ sliceNumber ] = currentImage[ crop[1][0]:crop[1][1], crop[0][0]:crop[0][1] ]
         except:
-              #logging.err.debug( traceback.format_exc() )
-              #logging.err.error( exc.message )
               raise Exception( "read_raw_slices(): Check image dimensions or ROI")
-              #return -1
 
     return outputVolume
 
@@ -139,12 +139,14 @@ def read_tiff_3D( image_data_format, image_size, base_dir, base_name, extension,
     import tifffile
 
     filename = "{}/{}{}".format( base_dir, base_name, extension )
-    logging.log.debug( "Read_tiff_3D: Loading Full TIFF Volume: %s"%(filename) )
+    try: logging.log.debug( "Read_tiff_3D: Loading Full TIFF Volume: %s"%(filename) )
+    except: print "Read_tiff_3D: Loading Full TIFF Volume: %s"%(filename) 
 
     outputVolume =  tifffile.imread( filename )
     outputVolume = outputVolume[ slices_range[0]:slices_range[1]+1, crop[0][1]:crop[1][1]+1, crop[0][2]:crop[1][2]+1 ]
 
-    logging.log.debug( "Read_tiff_3D: Volume mean value: %f"%( outputVolume.mean() ) )
+    try: logging.log.debug( "Read_tiff_3D: Volume mean value: %f"%( outputVolume.mean() ) )
+    except: print  "Read_tiff_3D: Volume mean value: %f"%( outputVolume.mean() ) 
 
     return outputVolume
 
@@ -182,7 +184,7 @@ def read_tiff_slices( image_data_format, imageDimensions, base_dir, tiff_base_na
 
     # Load all images into big array
     for sliceNumber in range( numberOfSlices ):
-
+          
           try:
               # 2016-04-30 ET: if worrking in 2D digits == 0 and the name in constructed differently
               if digits ==0:
@@ -200,10 +202,11 @@ def read_tiff_slices( image_data_format, imageDimensions, base_dir, tiff_base_na
 
           except :
                 #print "\nread_tiff_slices(): Could not read slice "
-              logging.log.warning( "read_tiff_slices(): File %s not found "%filename )
-              pass
+              try: logging.log.warning( "read_tiff_slices(): File %s not found "%filename )
+              except: print "read_tiff_slices(): File %s not found "%filename 
         
-    logging.log.debug( "read_tiff_slices(): Volume mean value = %s"%(outputVolume.mean()) )
+    try: logging.log.debug( "read_tiff_slices(): Volume mean value = %s"%(outputVolume.mean()) )
+    except: print "read_tiff_slices(): Volume mean value = %s"%(outputVolume.mean()) 
     
     return outputVolume
   
@@ -277,10 +280,11 @@ def read_tiff_pil_slices( image_data_format, imageDimensions, base_dir, tiff_bas
                 outputVolume[ sliceNumber ] = numpy.array( currentImage.getdata(), dtype=image_data_format ).reshape( currentImage.size[1], currentImage.size[0] )[ crop[1][0]:crop[1][1], crop[0][0]:crop[0][1] ]
 
         except :
-            logging.log.warning( "read_tiff_slices(): File %s not found "%filename )
-            pass
+            try: logging.log.warning( "read_tiff_slices(): File %s not found "%filename )
+            except: print "read_tiff_slices(): File %s not found "%filename 
     
-    logging.log.debug( "read_tiff_pil_slices(): Volume mean value = %s"%( outputVolume.mean() ) )
+    try: logging.log.debug( "read_tiff_pil_slices(): Volume mean value = %s"%( outputVolume.mean() ) )
+    except: print "read_tiff_pil_slices(): Volume mean value = %s"%( outputVolume.mean() ) 
         
     return outputVolume
   
@@ -330,10 +334,12 @@ def read_edf_slices( imageDimensions, base_dir, edf_base_name, digits, extension
                 outputVolume[ sliceNumber ] = currentImage[ crop[1][0]:crop[1][1], crop[0][0]:crop[0][1] ]
                 
         except :
-            logging.log.warning( "read_edf_slices(): File %s not found "%filename )
+            try: logging.log.warning( "read_edf_slices(): File %s not found "%filename )
+            except: print "read_edf_slices(): File %s not found "%filename 
             pass
           
-    logging.log.debug( "read_edf_pil_slices(): Volume mean value = %s"%( outputVolume.mean() ) )
+    try: logging.log.debug( "read_edf_pil_slices(): Volume mean value = %s"%( outputVolume.mean() ) )
+    except: print "read_edf_pil_slices(): Volume mean value = %s"%( outputVolume.mean() ) 
 
     return outputVolume
   

@@ -68,8 +68,10 @@ def regular_strain_large_strain_centred( positions, displacements, neighbourhood
   # if =1 we include (2*neighbourhoodDistance+1)^3-1
   numberOfNeighbours = (2*neighbourhoodDistance+1)**3-1
 
-  logging.log.info("regular_strain_large_strain_centered(): Calculating strains in Large Deformations framework \
+  try: logging.log.info("regular_strain_large_strain_centered(): Calculating strains in Large Deformations framework \
         \n (Geers et al., 1996, Computing strain felds from discrete displacement fields in 2D-solids ) taking neighbours plus or minus {:d}".format(neighbourhoodDistance) )
+  except: print "regular_strain_large_strain_centered(): Calculating strains in Large Deformations framework \
+        \n (Geers et al., 1996, Computing strain felds from discrete displacement fields in 2D-solids ) taking neighbours plus or minus {:d}".format(neighbourhoodDistance)
 
   nodalRealtivePositionsRef  = numpy.zeros( ( numberOfNeighbours, 3 ) ) # Delta_X_0 in document
   nodalRealtivePositionsDef  = numpy.zeros( ( numberOfNeighbours, 3 ) ) # Delta_X_t in document
@@ -193,6 +195,7 @@ def regular_strain_large_strain_centred( positions, displacements, neighbourhood
                     rot[ z, y, x, :, : ]    = numpy.zeros( (3,3) ) * numpy.nan
 
 
-  logging.log.info("regular_strain_large_strain_centered(): strain calculation done.")
+  try: logging.log.info("regular_strain_large_strain_centered(): strain calculation done.")
+  except: print "regular_strain_large_strain_centered(): strain calculation done."
   
   return [ strain, rot, connectivity ]

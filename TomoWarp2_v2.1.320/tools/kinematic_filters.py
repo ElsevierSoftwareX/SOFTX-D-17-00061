@@ -94,11 +94,13 @@ def kinematics_median_filter_fnc( positions, displacements, filter_size ):
   number_of_displacements = displacements.shape[1]
 
   if positions.shape[1] != 3:
-      logging.info.warn("kinematics_median_filter_fnc(): Not given three positions. Stopping.")
+      try: logging.info.warn("kinematics_median_filter_fnc(): Not given three positions. Stopping.")
+      except: print "kinematics_median_filter_fnc(): Not given three positions. Stopping."
       return -1
 
   if number_of_nodes != displacements.shape[0]:
-      logging.info.warn("kinematics_median_filter_fnc(): Not given the same amout of positions and displacements. Stopping.")
+      try: logging.info.warn("kinematics_median_filter_fnc(): Not given the same amout of positions and displacements. Stopping.")
+      except: print "kinematics_median_filter_fnc(): Not given the same amout of positions and displacements. Stopping."
       return -1
 
   nodes_z, nodes_y, nodes_x = calculate_node_spacing( positions )
@@ -114,13 +116,15 @@ def kinematics_median_filter_fnc( positions, displacements, filter_size ):
       else:
         z_spacing = nodes_z[1] - nodes_z[0]
   except IndexError:
-      logging.info.warn("kinematics_median_filter_fnc(): Not enough nodes to calculate median filter")
+      try: logging.info.warn("kinematics_median_filter_fnc(): Not enough nodes to calculate median filter")
+      except: print "kinematics_median_filter_fnc(): Not enough nodes to calculate median filter"
       return -1
 
   # If the node spacing is not the same in every direction, we're not sure that this
   #   can work.
   if z_spacing != y_spacing or z_spacing != x_spacing:
-      logging.info.warn("kinematics_median_filter_fnc(): The spacing is different, and I'm not sure I can handle this. Stopping.")
+      try: logging.info.warn("kinematics_median_filter_fnc(): The spacing is different, and I'm not sure I can handle this. Stopping.")
+      except: "kinematics_median_filter_fnc(): The spacing is different, and I'm not sure I can handle this. Stopping."
       return -1
 
   # Define output matrix
@@ -189,11 +193,13 @@ def kinematics_remove_outliers( positions, displacements, filter_size, threshold
   number_of_displacements = displacements.shape[1]
 
   if positions.shape[1] != 3:
-      logging.info.warn("kinematics_remove_outliers(): Not given three positions. Stopping.")
+      try: logging.info.warn("kinematics_remove_outliers(): Not given three positions. Stopping.")
+      except: print "kinematics_remove_outliers(): Not given three positions. Stopping."
       return -1
 
   if number_of_nodes != displacements.shape[0]:
-      logging.info.warn("kinematics_remove_outliers(): Not given the same amout of positions and displacements. Stopping.")
+      try: logging.info.warn("kinematics_remove_outliers(): Not given the same amout of positions and displacements. Stopping.")
+      except: print "kinematics_remove_outliers(): Not given the same amout of positions and displacements. Stopping."
       return -1
 
   nodes_z, nodes_y, nodes_x = calculate_node_spacing( positions )

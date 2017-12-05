@@ -39,10 +39,12 @@ def WriteTSV( filename, headers, table_of_results ):
   # TODO: Check overwrite
   if not isinstance(filename, file):
     fileHandle = open( filename, 'w')
-    logging.log.info("WriteTSV(): Going to write %s"%(filename))
+    try: logging.log.info("WriteTSV(): Going to write %s"%(filename))
+    except: print "WriteTSV(): Going to write %s"%(filename)
   else:
     fileHandle = filename
-    logging.log.info("WriteTSV(): Going to write TSV file")
+    try: logging.log.info("WriteTSV(): Going to write TSV file")
+    except: print "WriteTSV(): Going to write TSV file"
 
   number_of_headers = len( headers )
 
@@ -75,7 +77,8 @@ def WriteTSV( filename, headers, table_of_results ):
     # close up the file
     fileHandle.close()
 
-  logging.log.info("WriteTSV(): Done!")
+  try: logging.log.info("WriteTSV(): Done!")
+  except: print "WriteTSV(): Done!"
 
 
 
@@ -118,10 +121,12 @@ def ReadTSV( filename, index, list_of_desired_stats, start_stop ):
       fileHandle = open ( filename,"r" )
     except IOError as e:
       raise Exception('TVS file does not exist')
-    logging.log.info("ReadTSV(): Processing %s"%(filename))
+    try: logging.log.info("ReadTSV(): Processing %s"%(filename))
+    except: print "ReadTSV(): Processing %s"%(filename)
   else:
     fileHandle = filename
-    logging.log.info("ReadTSV(): Processing TSV file ")
+    try: logging.log.info("ReadTSV(): Processing TSV file ")
+    except: print "ReadTSV(): Processing TSV file "
 
   lineList = fileHandle.readlines()
 
@@ -171,7 +176,8 @@ def ReadTSV( filename, index, list_of_desired_stats, start_stop ):
       if item_count == 0:
         raise  Exception("ReadTSV: Did not match: %s EXITING"%(index))
       else:
-        logging.log.warn("ReadTSV: Did not match \" %s \""%(list_of_desired_stats[ item_count - 1 ])) 
+        try: logging.log.warn("ReadTSV: Did not match \" %s \""%(list_of_desired_stats[ item_count - 1 ])) 
+        except: print "ReadTSV: Did not match \" %s \""%(list_of_desired_stats[ item_count - 1 ])
         #NOTE: Consider removing this column from the matrix. Maybe not, otherwise we'll make it less wide, no good
 
 
@@ -189,7 +195,8 @@ def ReadTSV( filename, index, list_of_desired_stats, start_stop ):
       last_label = int( float( lastline[ stats_positions[ 0 ] ] ) )
       break
     except ValueError:
-      logging.log.warn("ReadTSV(): skipping a line at the end of the file") 
+      try: logging.log.warn("ReadTSV(): skipping a line at the end of the file") 
+      except: print "ReadTSV(): skipping a line at the end of the file"
       del lineList[-1]
       lastline  = string.split(  lineList[-1], "\t")
     except:
@@ -220,8 +227,10 @@ def ReadTSV( filename, index, list_of_desired_stats, start_stop ):
             results_matrix[ label, stat_count ] = line[ stats_positions[ stat_count ] ]
             
     except ValueError:
-      logging.log.warn("ReadTSV(): skipping line %i: %s"%(line_number,line)) 
+      try: logging.log.warn("ReadTSV(): skipping line %i: %s"%(line_number,line)) 
+      except: print "ReadTSV(): skipping line %i: %s"%(line_number,line)
 
-  logging.log.info( "ReadTSV(): Done! (size ={0})".format(results_matrix.shape) )
+  try: logging.log.info( "ReadTSV(): Done! (size ={0})".format(results_matrix.shape) )
+  except: print "ReadTSV(): Done! (size ={0})".format(results_matrix.shape)
 
   return results_matrix

@@ -150,7 +150,8 @@ def image_size_and_type( data ):
                 #print "\timage_size_and_type(): 3D Volume -- extents = size of whole volume!"
                 data.image_slices_extent[im] = [ 0, data.image_size[im,0]-1 ]
               else:
-                logging.log.debug( "image_size_and_type(): I got data.image_slices_extent == None, but I'm in a 2D file... " )
+                try: logging.log.debug( "image_size_and_type(): I got data.image_slices_extent == None, but I'm in a 2D file... " )
+                except: print "image_size_and_type(): I got data.image_slices_extent == None, but I'm in a 2D file... " 
                 data.image_slices_extent[im] = [ 0, 0 ]
 
           # === Update ROI to whole volume if missing === #

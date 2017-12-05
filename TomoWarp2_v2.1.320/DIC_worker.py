@@ -48,19 +48,20 @@ from sub_pixel.image_interpolation_translation_rotation import \
     image_interpolation_translation_rotation
 #from print_variable import pv
 
-VERBOSE = False
 
 def DIC_worker( workerNumber, q_nodes, q_results, q_data_requests, q_data, data ):
 
     time.sleep( 1 )
-    if VERBOSE: logging.log.info("DIC_worker %i: Started up"%( workerNumber ))
+    try: logging.log.info("DIC_worker %i: Started up"%( workerNumber ))
+    except: print "DIC_worker %i: Started up"%( workerNumber )
 
     while True:
         #time.sleep( 1 )
         setupMessage = q_nodes.get()
 
         if setupMessage[0] == "STOP":
-            if VERBOSE: logging.log.info("DIC_worker %i: Got a request to stop, quitting."%( workerNumber ))
+            try: logging.log.info("DIC_worker %i: Got a request to stop, quitting."%( workerNumber ))
+            except: "DIC_worker %i: Got a request to stop, quitting."%( workerNumber )
             return -1
 
         else:

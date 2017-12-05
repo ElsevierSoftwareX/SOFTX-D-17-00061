@@ -72,8 +72,8 @@ def tomowarp_runfile( data ):
     # 2015-04-28 -- Update all automatic variables in data
     input_parameters_update( data )
 
-    logging.log.info('\n')
     try:
+      logging.log.info('\n')
       # Setting the message format in logging file to show time and type of message
       fh_log.setFormatter( logging.Formatter('%(asctime)s - %(levelname)s - %(message)s') )
     except:
@@ -105,15 +105,20 @@ def tomowarp_runfile( data ):
         kinematics, nodes_z, nodes_y, nodes_x = layout_nodes( data.node_spacing, data.ROI_corners[0] )
         nodesToProcess = numpy.array( range( 0, kinematics.shape[0] ) )
 
-        logging.log.info( "* Identified "+str(int(kinematics[-1,0]+1))+" Node(s)\n" \
+        try: logging.log.info( "* Identified "+str(int(kinematics[-1,0]+1))+" Node(s)\n" \
                           "   * Node positions Z:"+str( nodes_z )+"\n"          \
                           "   * Node positions Y:"+str( nodes_y )+"\n"          \
                           "   * Node positions X:"+str( nodes_x )+"\n" )
+        except: print  "* Identified "+str(int(kinematics[-1,0]+1))+" Node(s)\n" \
+                          "   * Node positions Z:"+str( nodes_z )+"\n"          \
+                          "   * Node positions Y:"+str( nodes_y )+"\n"          \
+                          "   * Node positions X:"+str( nodes_x )+"\n" 
 
     if data.prior_file != None:
 
         # Load a prior file and try to figure out whether the node spacing is the the same as what we want...
-        logging.log.info( " Loading Prior file: %s"%(data.prior_file) )
+        try: logging.log.info( " Loading Prior file: %s"%(data.prior_file) )
+        except: print " Loading Prior file: %s"%(data.prior_file) 
         prior = ReadTSV( data.prior_file,  "NodeNumber", [ "Zpos", "Ypos", "Xpos", "Zdisp", "Ydisp", "Xdisp",  "Zrot", "Yrot", "Xrot","CC", "Error" ], [1,0] )
 
         # sort the prior to be sure it is organised
@@ -146,7 +151,8 @@ def tomowarp_runfile( data ):
             imsave( data.DIR_out + "/%s-prior-x-field-%04ix%04ix%04i.tif"%(  data.output_name, len(nodes_x), len(nodes_y), len(nodes_z)),     kinematics[ :, 6 ].reshape( ( len(nodes_z), len(nodes_y), len(nodes_x) ) ).astype( '<f4' ) )
 
 
-    logging.log.info( "Nodes To Process = %i"%(nodesToProcess.shape[0]) )
+    try: logging.log.info( "Nodes To Process = %i"%(nodesToProcess.shape[0]) )
+    except: print  "Nodes To Process = %i"%(nodesToProcess.shape[0]) 
 
     if nodesToProcess.shape[0] != 0:
       try:
@@ -177,7 +183,8 @@ def tomowarp_runfile( data ):
     hours = int(runTime/(60*60) )
     minutes = int(runTime/(60) ) - 60*hours
     seconds = runTime - 60*60*hours - 60*minutes
-    logging.log.info( "TIME: I think I ran for: %02i:%02i:%02i"%( hours, minutes, seconds ) )
+    try: logging.log.info( "TIME: I think I ran for: %02i:%02i:%02i"%( hours, minutes, seconds ) )
+    except: print "TIME: I think I ran for: %02i:%02i:%02i"%( hours, minutes, seconds ) 
     
     try:
       logging.log.removeHandler(fh_log)

@@ -263,7 +263,8 @@ def image_interpolation_translation_rotation( im1, im2, initialGuess=None, corne
           return [ [ z, y, x,0,0,0 ], cc, len(subPixelSearchRange)**3, 0 ]
 
       else:
-          logging.log.error("image_interpolation_translation_rotation: optimisation mode \"{}\" unknown".format( optimisationMode ) )
+          try: logging.log.error("image_interpolation_translation_rotation: optimisation mode \"{}\" unknown".format( optimisationMode ) )
+          except: print "image_interpolation_translation_rotation: optimisation mode \"{}\" unknown".format( optimisationMode ) 
           if Rot:
             return [ [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ], 0.0, 0.0, 999 ]
           else:

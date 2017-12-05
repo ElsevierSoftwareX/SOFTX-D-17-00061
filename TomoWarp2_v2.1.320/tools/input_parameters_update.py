@@ -45,7 +45,8 @@ def input_parameters_update( data ):
     # 2015-04-09 EA: Simple test shows that nWorkers = numberOfCPUs is faster than numberOfCPUs - 1
     if data.nWorkers == "auto":
         numberOfCPUs = cpu_set_count()
-        logging.log.info("input_parameters_setup(): Number of CPUs %i"%( numberOfCPUs ))
+        try: logging.log.info("input_parameters_setup(): Number of CPUs %i"%( numberOfCPUs ))
+        except: print "input_parameters_setup(): Number of CPUs %i"%( numberOfCPUs )
 
         data.nWorkers = max( 1, numberOfCPUs )
 
@@ -60,9 +61,14 @@ def input_parameters_update( data ):
         #memSlice2 = data.image_size[1,-2] * data.image_size[1,-1] * int( data.image_data_format[-1] )
         data.memLimitSlices =  min( data.memLimitSlices, data.memLimitMB  * 1024 * 1024  / ( memSlice1 + memSlice2 ) )
 
-        logging.log.info("memory limit:                  %.1f MB"%(data.memLimitMB)        )
-        logging.log.info("memory of one slice of image1: %.1f MB"%(memSlice1 / 1024 / 1024))
-        logging.log.info("memory of one slice of image2: %.1f MB"%(memSlice2 / 1024 / 1024))
+        try:
+          logging.log.info("memory limit:                  %.1f MB"%(data.memLimitMB)        )
+          logging.log.info("memory of one slice of image1: %.1f MB"%(memSlice1 / 1024 / 1024))
+          logging.log.info("memory of one slice of image2: %.1f MB"%(memSlice2 / 1024 / 1024))
+        except:
+          print "memory limit:                  %.1f MB"%(data.memLimitMB)        
+          print "memory of one slice of image1: %.1f MB"%(memSlice1 / 1024 / 1024)
+          print "memory of one slice of image2: %.1f MB"%(memSlice2 / 1024 / 1024)
 
 
     # grey thresholds -- update them if they're None.

@@ -50,6 +50,7 @@ def cc_autothreshold( cc_field ):
       # ugly: replace cc_threshold (which if we're here is a string) with a number
       cc_threshold = bin_edges[ numpy.where( cc_hist < 0.015 * cc_hist.max() ) ][-1]
             
-      logging.log.info( "  Automatic CC threshold calculator: I chose a CC value of: %f"%(cc_threshold) )
+      try: logging.log.info( "  Automatic CC threshold calculator: I chose a CC value of: %f"%(cc_threshold) )
+      except: print  "  Automatic CC threshold calculator: I chose a CC value of: %f"%(cc_threshold) 
 
       return cc_threshold
