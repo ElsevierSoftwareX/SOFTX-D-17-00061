@@ -56,7 +56,8 @@ from tools.print_variable import pv
 
 def tetrahedral_elements_strain( positions, displacements, connectivity = None, mask = [] ):
 
-  logging.log.info("tetrahedral_elements_strain(): Calculating strains using tetrahedral elements")
+  try: logging.log.info("tetrahedral_elements_strain(): Calculating strains using tetrahedral elements")
+  except: print "tetrahedral_elements_strain(): Calculating strains using tetrahedral elements"
 
   positions = positions[:,[2,1,0]]
 
@@ -171,6 +172,7 @@ def tetrahedral_elements_strain( positions, displacements, connectivity = None, 
   
   strain[ numpy.where(strain>10) ] = 0
 
-  logging.log.info("tetrahedral_elements_strain: strain calculation done.")
+  try: logging.log.info("tetrahedral_elements_strain: strain calculation done.")
+  except: print "tetrahedral_elements_strain: strain calculation done."
 
   return [ strain, rot, new_connectivity, coordinates ]

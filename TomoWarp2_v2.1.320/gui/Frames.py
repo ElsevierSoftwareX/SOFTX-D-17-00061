@@ -165,7 +165,7 @@ class ControlButton(Frame):
               logging.err.error( exc.message )
               logging.err.removeHandler(fh_err)
             except:
-              pass
+              print exc.message
 
         self.message.set("")
         ChooseImageDimensions.setvalues(self.master.imagesDim, self.master)

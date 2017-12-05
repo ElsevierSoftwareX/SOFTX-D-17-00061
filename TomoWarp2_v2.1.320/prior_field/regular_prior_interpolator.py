@@ -58,7 +58,8 @@ def regular_prior_interpolator( old_prior, new_prior, filter_size=None ):
       old_z_spacing = old_nodes_z[1] - old_nodes_z[0]
   old_y_spacing = old_nodes_y[1] - old_nodes_y[0]
   old_x_spacing = old_nodes_x[1] - old_nodes_x[0]
-  logging.log.info("regular_prior_interpolator: Prior node spacing (z,y,x) is:\t{:.0f} {:.0f} {:.0f}".format( old_z_spacing, old_y_spacing, old_x_spacing ))
+  try: logging.log.info("regular_prior_interpolator: Prior node spacing (z,y,x) is:\t{:.0f} {:.0f} {:.0f}".format( old_z_spacing, old_y_spacing, old_x_spacing ))
+  except: print "regular_prior_interpolator: Prior node spacing (z,y,x) is:\t{:.0f} {:.0f} {:.0f}".format( old_z_spacing, old_y_spacing, old_x_spacing )
 
   # Reshape prior field to a three dimensional arrays
   z_field = old_prior[ :, 4 ].reshape( ( len(old_nodes_z), len(old_nodes_y), len(old_nodes_x) ) )
@@ -88,7 +89,8 @@ def regular_prior_interpolator( old_prior, new_prior, filter_size=None ):
   x_field[ numpy.where( numpy.isinf( x_field ) ) ] = 0
 
   if filter_size is not None and filter_size > 0:
-      logging.log.info("regular_prior_interpolator: Smoothing kinematics field")
+      try: logging.log.info("regular_prior_interpolator: Smoothing kinematics field")
+      except: print "regular_prior_interpolator: Smoothing kinematics field"
       # 2014-07-18 -- Edward Ando
       # Changing the median filter for the field from scipy.ndimage.filters.median_filter
       #   (which seems to propagate NaNs) to our own, home-developed median filter:
@@ -124,7 +126,8 @@ def regular_prior_interpolator( old_prior, new_prior, filter_size=None ):
   number_of_nans = len( nan_positions[0] )
 
   if number_of_nans > 0:
-      logging.log.warn("regular_prior_interpolator(): {:.0f} NaNs detected, replacing them with a median value of the smallest window that touches real data".format( number_of_nans ))
+      try: logging.log.warn("regular_prior_interpolator(): {:.0f} NaNs detected, replacing them with a median value of the smallest window that touches real data".format( number_of_nans ))
+      except: print "regular_prior_interpolator(): {:.0f} NaNs detected, replacing them with a median value of the smallest window that touches real data".format( number_of_nans )
 
   for nan_number in range( number_of_nans ):
       z = nan_positions[0][nan_number]

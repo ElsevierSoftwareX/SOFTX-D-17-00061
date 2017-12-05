@@ -58,7 +58,8 @@ from tools.print_variable import pv
 
 def regular_strain_large_strain( positions, displacements, calculateConnectivity=False ):
 
-  logging.log.info("regular_strain_large_strain: Calculating strains in Large Deformations framework...")
+  try: logging.log.info("regular_strain_large_strain: Calculating strains in Large Deformations framework...")
+  except: print "regular_strain_large_strain: Calculating strains in Large Deformations framework..."
 
   SFderivative        = numpy.zeros( ( 3, 8 ) ) # Derivative of shape functions from F.E.
   relNodePos          = numpy.zeros( ( 8, 3 ) ) # RELATIVE Node positions
@@ -242,6 +243,7 @@ def regular_strain_large_strain( positions, displacements, calculateConnectivity
                                                                 firstCorner+len(nodes_x)*len(nodes_y)+len(nodes_x)+1, firstCorner+len(nodes_x)*len(nodes_y)+len(nodes_x) ] ], axis=0 )
                 cellIndex = numpy.append( cellIndex, x + y*(len(nodes_x)-1) + z*(len(nodes_x)-1)*(len(nodes_y)-1) )
 
-  logging.log.info("regular_strain_large_strain: strain calculation done.")
+  try: logging.log.info("regular_strain_large_strain: strain calculation done.")
+  except: print "regular_strain_large_strain: strain calculation done."
                 
   return [ strain, rot, connectivity, cellIndex ]

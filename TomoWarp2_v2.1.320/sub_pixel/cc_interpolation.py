@@ -57,7 +57,8 @@ def cc_interpolation_local( im1, im2, refinement_step_threshold = 0.0001, max_re
 
         # Check that im2's size is two pixels bigger in each direction than im1
         if not all( numpy.array(im2.shape) - numpy.array(im1.shape) == 2 ):
-            logging.log.warning( "cc_interpolation_local(): im2's dimensions ({}) are not im1 ({}) +2".format( im2.shape, im1.shape ) )
+            try: logging.log.warning( "cc_interpolation_local(): im2's dimensions ({}) are not im1 ({}) +2".format( im2.shape, im1.shape ) )
+            except: print  "cc_interpolation_local(): im2's dimensions ({}) are not im1 ({}) +2".format( im2.shape, im1.shape ) 
             return numpy.array( [ 0, 0, 0, 0, 0, 32] )
 
         # This is the 3x3x3 matrix of CC values which we will interpolate.
@@ -81,8 +82,12 @@ def cc_interpolation_local( im1, im2, refinement_step_threshold = 0.0001, max_re
         #                                   |  if each component of  | | sum truth values      |
         #                                   |  CCmaxPositions is 1   | | along x,y,z for all() | if ANY max position was at 1,1,1
         if not numpy.all( CCmaxPositions == numpy.array([1,1,1]).all(), axis=1                 ).any():
-            logging.log.warning("cc_interpolation_local(): Maximum of CC is not in the middle of the im2.")
-            logging.log.debug("cc_interpolation_local(): numpy.where( CC == CC.max() = {}".format(numpy.where( CC == CC.max() )))
+            try:
+              logging.log.warning("cc_interpolation_local(): Maximum of CC is not in the middle of the im2.")
+              logging.log.debug("cc_interpolation_local(): numpy.where( CC == CC.max() = {}".format(numpy.where( CC == CC.max() )))
+            except:
+              print "cc_interpolation_local(): Maximum of CC is not in the middle of the im2."
+              print "cc_interpolation_local(): numpy.where( CC == CC.max() = {}".format(numpy.where( CC == CC.max() ))
             return numpy.array( [ 0, 0, 0, 0, 0, 128] )
 
         ########################################################################
@@ -268,7 +273,8 @@ def cc_interpolation_local_2D( im1, im2,    refinement_step_threshold = 0.0001, 
 
         # Check that im2's size is two pixels bigger in each direction than im1
         if not ( im2.shape[1] - im1.shape[1] == 2 and im2.shape[2] - im1.shape[2] == 2 ):
-            logging.log.warning( "cc_interpolation_local_2D(): im2's dimensions ({}) are not im1 ({}) +2".format( im2.shape, im1.shape ) )
+            try: logging.log.warning( "cc_interpolation_local_2D(): im2's dimensions ({}) are not im1 ({}) +2".format( im2.shape, im1.shape ) )
+            except: print  "cc_interpolation_local_2D(): im2's dimensions ({}) are not im1 ({}) +2".format( im2.shape, im1.shape ) 
             return numpy.array( [ 0, 0, 0, 0, 0, 32] )
 
         # This is the 3x3x3 matrix of CC values which we will interpolate.
@@ -290,8 +296,12 @@ def cc_interpolation_local_2D( im1, im2,    refinement_step_threshold = 0.0001, 
         #                                   |  if each component of  | | sum truth values      |
         #                                   |  CCmaxPositions is 1   | | along x,y,z for all() | if ANY max position was at 1,1,1
         if not numpy.all( CCmaxPositions == numpy.array([1,1]).all(), axis=1                 ).any():
-            logging.log.warning("cc_interpolation_local_2D(): Maximum of CC is not in the middle of the im2.")
-            logging.log.debug("cc_interpolation_local_2D(): numpy.where( CC == CC.max() = {}".format(numpy.where( CC == CC.max() )))
+            try:
+              logging.log.warning("cc_interpolation_local_2D(): Maximum of CC is not in the middle of the im2.")
+              logging.log.debug("cc_interpolation_local_2D(): numpy.where( CC == CC.max() = {}".format(numpy.where( CC == CC.max() )))
+            except:
+              print "cc_interpolation_local_2D(): Maximum of CC is not in the middle of the im2."
+              print "cc_interpolation_local_2D(): numpy.where( CC == CC.max() = {}".format(numpy.where( CC == CC.max() ))
             return numpy.array( [ 0, 0, 0, 0, 0, 128] )
 
         ########################################################################
