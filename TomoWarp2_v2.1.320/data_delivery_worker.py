@@ -53,7 +53,6 @@ import sys
 import logging
 from tools.load_slices import load_slices
 
-VERBOSE = True
 
 # to unpickle our pipes to the DIC workers, otherwise they can't be send by pipe, see
 #   http://stackoverflow.com/questions/1446004/python-2-6-send-connection-object-over-queue-pipe-etc
@@ -61,7 +60,8 @@ VERBOSE = True
 def data_delivery_worker( pipe_data_requests_out, workerQueues ):
   
   
-    if VERBOSE: logging.log.info( "data_delivery_worker: Started." )
+    try: logging.log.info( "data_delivery_worker: Started." )
+    except: print "data_delivery_worker: Started." 
 
     # Initialise current z-extents and empty images
     zExtents_im1_current = [ -1, -1 ]
@@ -88,20 +88,24 @@ def data_delivery_worker( pipe_data_requests_out, workerQueues ):
 
         elif message[0] == "NewExtents":
 
-            if VERBOSE: logging.log.info( "data_delivery_worker(): message = "+str( message ) )
+            try: logging.log.info( "data_delivery_worker(): message = "+str( message ) )
+            except: print  "data_delivery_worker(): message = "+str( message ) 
             # Here we are expecting two arrays with a new top and bottom z slices numbers for im1 and im2
             zExtents_im1_new = message[1][0]
             zExtents_im2_new = message[1][1]
 
             try:
               # load new slices, if any, and update current z extents.
-              if VERBOSE: logging.log.info( "data_delivery_worker(): Loading data..." )
+              try: logging.log.info( "data_delivery_worker(): Loading data..." )
+              except: print  "data_delivery_worker(): Loading data..." 
               zExtents_im1_current, im1 = load_slices( zExtents_im1_new, zExtents_im1_current, im1, 1, data )
               zExtents_im2_current, im2 = load_slices( zExtents_im2_new, zExtents_im2_current, im2, 2, data )
-              if VERBOSE: logging.log.info( "data_delivery_worker(): Done" )
+              try: logging.log.info( "data_delivery_worker(): Done" )
+              except: print  "data_delivery_worker(): Done" 
             except Exception as exc:
               #raise Exception(exc)
-              logging.err.error( exc.message )
+              try: logging.err.error( exc.message )
+              except: print exc.message 
               im1=[]
               im2=[]
 
@@ -153,5 +157,6 @@ def data_delivery_worker( pipe_data_requests_out, workerQueues ):
 
 
         elif message[0] == "STOP":
-            logging.log.info( "data_delivery_worker: Received stop, stopping" )
+            try: logging.log.info( "data_delivery_worker: Received stop, stopping" )
+            except: print  "data_delivery_worker: Received stop, stopping" 
             return -1

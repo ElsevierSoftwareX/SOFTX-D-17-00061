@@ -44,7 +44,6 @@ import logging
 from DIC_worker import DIC_worker
 from tools.print_variable import pv
 
-VERBOSE = True
 
 # 2015-01-28 EA and ET: we need to pickle the DIC_worker pipes, that we are sending into a pipe to data_delivery_worker
 #   See: http://stackoverflow.com/questions/1446004/python-2-6-send-connection-object-over-queue-pipe-etc
@@ -132,7 +131,8 @@ def DIC_setup( kinematics, data, q_data_requests, workerQueues ):
     extentsCheck = (extents[:,:,1,0] - extents[:,:,0,0]) > data.memLimitSlices
 
     if extentsCheck.any() :
-      logging.err.error("DIC_setup(): The memory limit set does not fulfil the required vertical extents for at least one node")
+      try: logging.err.error("DIC_setup(): The memory limit set does not fulfil the required vertical extents for at least one node")
+      except: print "DIC_setup(): The memory limit set does not fulfil the required vertical extents for at least one node"
       for workerNumber in range( data.nWorkers ):
           q_nodes.put( [ "STOP" ] )
       return
