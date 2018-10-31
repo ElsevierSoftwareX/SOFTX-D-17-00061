@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2016, Erika Tudisco, Edward Andò, Stephen Hall, Rémi Cailletaud
@@ -70,7 +70,9 @@ def construct_mask( kinematics, cc_threshold=None ):
     # add the nodes which are error nodes to the mask
     mask[ numpy.where( kinematics[ :, 11 ] != 0 ) ] = numpy.inf
     mask[ numpy.where( kinematics[ :, 11 ] > 2 ) ] = numpy.nan
-        
+     
+    mask = numpy.zeros( cc_field.shape, dtype='<f4' )
+     
     return mask
 
 def process_results(  kinematics, data ):
@@ -187,15 +189,15 @@ def process_results(  kinematics, data ):
               cellType = 12
 
         elif  data.strain_mode == "largeStrains":
-            [ strain, rot, connectivity, cellIndex ] = regular_strain_large_strain( kinematics[:,1:4], kinematics[:,4:7], data.saveVTK )
-
+            [ strain, rot, connectivity, cellIndex, volStrain ] = regular_strain_large_strain( kinematics[:,1:4], kinematics[:,4:7], data.saveVTK )
+            
             if data.saveVTK:
               connectivity = numpy.searchsorted(numpy.where(numpy.isfinite(mask))[0],connectivity)
               cellType = 12
 
         elif  data.strain_mode == "largeStrainsCentred":
             neighbourhoodDistance = 1
-            [ strain, rot, connectivity ] = regular_strain_large_strain_centred( kinematics[:,1:4], kinematics[:,4:7], neighbourhoodDistance )
+            [ strain, rot, connectivity, volStrain ] = regular_strain_large_strain_centred( kinematics[:,1:4], kinematics[:,4:7], neighbourhoodDistance )
             if data.saveVTK:
               cellIndex = numpy.squeeze(connectivity).astype( 'i' )
               connectivity = numpy.searchsorted(numpy.where(numpy.isfinite(mask))[0],connectivity)
@@ -215,8 +217,14 @@ def process_results(  kinematics, data ):
         rot    = rot.astype(    '<f4' )
         strain_components = {}              
         strain_components_int = {}
-        
-        # Extract strain tensor components
+
+        # 0S: 17-10-18 Catch 2D case
+        if len(nodes_z)==1:
+            twoD = True
+        else:
+            twoD = False
+
+        ## Extract strain tensor components
         if len(strain.shape) == 5 :
             strain_components['zz'] = numpy.array( strain[ :, :, :, 0, 0 ] )
             strain_components['zz'] = numpy.array( strain[ :, :, :, 0, 0 ] )
@@ -232,15 +240,43 @@ def process_results(  kinematics, data ):
             strain_components['yy'] = numpy.array( strain[ :, 1, 1 ] )
             strain_components['yx'] = numpy.array( strain[ :, 1, 2 ] )
             strain_components['xx'] = numpy.array( strain[ :, 2, 2 ] )
-            
-        # Volumetric Strain is the trace
-        strain_components['volumetric']     = strain_components['zz'] + strain_components['yy'] + strain_components['xx']
-        # Steve's Maximum Shear Strain, see: Ando (2013) Phd, and Hall et al. 2009
-        strain_components['maximum_shear']  = ( 1/3.0 ) * numpy.sqrt( 2*( strain_components['xx']-strain_components['yy'] )**2  +  \
-                                                                      2*( strain_components['xx']-strain_components['zz'] )**2  +  \
-                                                                      2*( strain_components['yy']-strain_components['zz'] )**2  +  \
-                                                                      3*strain_components['yx']**2 + 3*strain_components['zx']**2 + 3*strain_components['zy']**2 )
 
+        # Volumetric Strain is the trace only in the case of small strains...
+        if data.strain_mode == "smallStrains":
+            strain_components['volumetric']     = strain_components['zz'] + strain_components['yy'] + strain_components['xx']
+        
+        # "Real" volumetric strain from: https://en.wikipedia.org/wiki/Infinitesimal_strain_theory#Volumetric_strain taking a=1
+        elif data.strain_mode == "largeStrains" or data.strain_mode == "largeStrainsCentred" or data.strain_mode == "tetrahedralStrains":
+            # 0S: 17-10-18 volumetric strain in large strains is given from the determinant of the transformation gradient tensor F
+            strain_components['volumetric']  =  volStrain
+        
+        # Steve's Maximum Shear Strain, see: Ando (2013) Phd, and Hall et al. 2009
+        # 0S: 17-10-18
+        #   see Wood: Soil Behaviour and Critical State Soil Mechanics (p. 21)
+        #   this definition comes from work-conjugate pairs expressed in terms of the engineering strain γ (γ=0.5*ε)
+        #   so the coefficient 3 becomes 12
+        #   NOTE #1: this definition is only valid for small strains, for the moment we keep it for large strains too
+        #   NOTE #2: in large strains: a decomposition of the stretch tensor U=Uiso*Udev should give us the deviatoric strain --> TODO soon.
+        #   NOTE #3: you need to catch a 2D case, otherwise you're subtracting 'yy' and 'xx' from 'zz'(which is 0) and that gives you a huge difference
+        if not twoD:
+            strain_components['maximum_shear']  = ( 1/3.0 ) * numpy.sqrt( 2*( strain_components['xx']-strain_components['yy'] )**2  +  \
+                                                                        2*( strain_components['xx']-strain_components['zz'] )**2  +  \
+                                                                        2*( strain_components['yy']-strain_components['zz'] )**2  +  \
+                                                                            #3*strain_components['yx']**2 + 3*strain_components['zx']**2 + 3*strain_components['zy']**2 )
+                                                                            12*strain_components['yx']**2 + 12*strain_components['zx']**2 + 12*strain_components['zy']**2 )
+        else:
+            #OS: 17-10-18 no idea for the coefficients in 2D, sorry
+            strain_components['maximum_shear']  = ( 1/3.0 ) * numpy.sqrt( 2*(strain_components['xx']-strain_components['yy'] )**2  +  \
+                                                                            #3*strain_components['yx']**2 + 3*strain_components['zx']**2 + 3*strain_components['zy']**2 )
+                                                                            12*strain_components['yx']**2 )
+
+        ############################################
+        # 0S: 17-10-18:
+        # tests for:
+        #   1: isotropic compression and
+        #   2: simple shear
+        # passed for 3D and 2D.
+        ############################################
 
         if data.saveVTK:
           WriteVTK_maesh( data.DIR_out + "/%s.vtk"%( data.output_name ), connectivity, headersEndPosition, cellType )

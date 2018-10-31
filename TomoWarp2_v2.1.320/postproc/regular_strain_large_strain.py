@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2016, Erika Tudisco, Edward Andò, Stephen Hall, Rémi Cailletaud
@@ -126,6 +126,7 @@ def regular_strain_large_strain( positions, displacements, calculateConnectivity
   #  2016-04-28 ET: strain tensor is filled up to len( nodes_# )-1, changing the declaration to fit this size 
   strain = numpy.zeros( ( len( nodes_z ) - 1, len( nodes_y ) - 1, len( nodes_x ) - 1, 3, 3 ) )
   rot    = numpy.zeros( ( len( nodes_z ) - 1, len( nodes_y ) - 1, len( nodes_x ) - 1, 3, 3 ) )
+  volStrain = numpy.zeros( ( len( nodes_z ) - 1, len( nodes_y ) - 1, len( nodes_x ) - 1, 1 ) )
 
 
   #-----------------------------------------------------------------------
@@ -195,6 +196,7 @@ def regular_strain_large_strain( positions, displacements, calculateConnectivity
         if numpy.all( numpy.isfinite( nodalDisplacements ) ) == False:
             strain[ z, y, x, :, : ] = numpy.zeros( (3,3) ) * numpy.nan
             rot[ z, y, x, :, : ]    = numpy.zeros( (3,3) ) * numpy.nan
+            volStrain[ z, y, x] = numpy.nan
 
         else:
             # This is our temporary variable for the calculation of the gradient of displacement
@@ -204,7 +206,9 @@ def regular_strain_large_strain( positions, displacements, calculateConnectivity
             #-  Calculate du/dx --  2014-11-12 PB and EA: removing (du/dx).T since we're going for a green-lagrange tensor... see above
             #-----------------------------------------------------------------------
             for i in range(3):
-              for j in range( i, 3 ):  # N.B. this does: i,j = 0,0; 0,1; 0,2; 1,1; 1,2; 2,2
+              # OS 17-10-18: in large strains dudx is NOT symmetric
+              #for j in range( i, 3 ):  # N.B. this does: i,j = 0,0; 0,1; 0,2; 1,1; 1,2; 2,2
+              for j in range(3):
                 for nodeNumber in range(8):
                   # Original Comment: /* strain=dsdx*SFderivative*nodalDisplacements; */
                   dudx[i,j] = dudx[i,j] + ( Bn[i,nodeNumber] * nodalDisplacements[nodeNumber,j] )
@@ -213,10 +217,11 @@ def regular_strain_large_strain( positions, displacements, calculateConnectivity
                   rot[   z,y,x,i,j] = rot[   z,y,x,i,j] + \
                                       0.5*(Bn[i,nodeNumber]*nodalDisplacements[nodeNumber,j] - Bn[j,nodeNumber]*nodalDisplacements[nodeNumber,i])
 
-            # 2014-11-12 PB and EA: completing the diagonal terms of the dudx and rotation tensors
-            dudx[ 1, 0 ] = dudx[ 0, 1 ]
-            dudx[ 2, 0 ] = dudx[ 0, 2 ]
-            dudx[ 2, 1 ] = dudx[ 1, 2 ]
+           # OS 17-10-18: in large strains dudx is NOT symmetric
+           # # 2014-11-12 PB and EA: completing the diagonal terms of the dudx and rotation tensors
+           # dudx[ 1, 0 ] = dudx[ 0, 1 ]
+           # dudx[ 2, 0 ] = dudx[ 0, 2 ]
+           # dudx[ 2, 1 ] = dudx[ 1, 2 ]
 
             rot[ z,y,x,1,0 ]    = rot[ z,y,x,0,1]
             rot[ z,y,x,2,0 ]    = rot[ z,y,x,0,2]
@@ -224,6 +229,7 @@ def regular_strain_large_strain( positions, displacements, calculateConnectivity
 
             # Strain Gradient tensor
             F = I + dudx
+            #volStraini = numpy.linalg.det( Fi ) - 1
 
             # Right Cauchy-Green tensor (as opposed to left)
             C = numpy.dot( F.T, F )
@@ -233,6 +239,8 @@ def regular_strain_large_strain( positions, displacements, calculateConnectivity
 
             # Call our strain "E"
             strain[ z, y, x, :, : ] = E
+            volStrain[ z, y, x ] = numpy.linalg.det( F ) - 1
+            
 
             # 2017-03-09 EA and JD: If VTK set calculate this -- excluding by default because the .append is crazy slow
             if calculateConnectivity:
@@ -246,4 +254,4 @@ def regular_strain_large_strain( positions, displacements, calculateConnectivity
   try: logging.log.info("regular_strain_large_strain: strain calculation done.")
   except: print "regular_strain_large_strain: strain calculation done."
                 
-  return [ strain, rot, connectivity, cellIndex ]
+  return [ strain, rot, connectivity, cellIndex,  volStrain]
