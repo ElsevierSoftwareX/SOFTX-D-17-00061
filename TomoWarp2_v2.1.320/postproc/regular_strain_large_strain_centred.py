@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2016, Erika Tudisco, Edward Andò, Stephen Hall, Rémi Cailletaud
@@ -102,6 +102,7 @@ def regular_strain_large_strain_centred( positions, displacements, neighbourhood
   ##  2014-11-12 PB and EA: changing strain 6-component vector to a full 3x3 strain tensor
   strain = numpy.zeros( ( len( nodes_z ), len( nodes_y ), len( nodes_x ), 3, 3 ) )
   rot    = numpy.zeros( ( len( nodes_z ), len( nodes_y ), len( nodes_x ), 3, 3 ) )
+  volStrain = numpy.zeros( ( len( nodes_z ) - 1, len( nodes_y ) - 1, len( nodes_x ) - 1, 1 ) )
 
 
   ########################################################################
@@ -110,9 +111,9 @@ def regular_strain_large_strain_centred( positions, displacements, neighbourhood
   #-----------------------------------------------------------------------
   #-  Reshape the displacements so that we easily have the neighbours   --
   #-----------------------------------------------------------------------
-  displacements_x = displacements[ :, 2 ].reshape( ( len( nodes_z ), len( nodes_y ), len( nodes_x ) ) )
-  displacements_y = displacements[ :, 1 ].reshape( ( len( nodes_z ), len( nodes_y ), len( nodes_x ) ) )
-  displacements_z = displacements[ :, 0 ].reshape( ( len( nodes_z ), len( nodes_y ), len( nodes_x ) ) )
+  #displacements_x = displacements[ :, 2 ].reshape( ( len( nodes_z ), len( nodes_y ), len( nodes_x ) ) )
+  #displacements_y = displacements[ :, 1 ].reshape( ( len( nodes_z ), len( nodes_y ), len( nodes_x ) ) )
+  #displacements_z = displacements[ :, 0 ].reshape( ( len( nodes_z ), len( nodes_y ), len( nodes_x ) ) )
 
   # This is a 4D array of x, y, z positions + component...
   displacements = displacements.reshape( ( len( nodes_z ), len( nodes_y ), len( nodes_x ), 3 ) )
@@ -163,6 +164,7 @@ def regular_strain_large_strain_centred( positions, displacements, neighbourhood
               if numpy.all( numpy.isfinite( nodalRealtivePositionsDef ) ) == False:
                   strain[ z, y, x, :, : ] = numpy.zeros( (3,3) ) * numpy.nan
                   rot[ z, y, x, :, : ]    = numpy.zeros( (3,3) ) * numpy.nan
+                  volStrain[ z, y, x] = numpy.nan
 
               else:
                 # multiply the sums sX0X0, sX0Xt by numberOfNeighbours
@@ -179,9 +181,11 @@ def regular_strain_large_strain_centred( positions, displacements, neighbourhood
 
                     # Green-Lagrange tensors
                     E = 0.5*( numpy.dot( F.T, F ) - I )
+                    
 
                     # Call our strain "E"
                     strain[ z, y, x, :, : ] = E
+                    volStrain[ z, y, x ] = numpy.linalg.det( F ) - 1
                     #print "\tregular_strain_large_strain_centred: success!!!"
                     
                     # 2017-03-09 EA and JD: If VTK set calculate this -- excluding by default because the .append is crazy slow
@@ -193,9 +197,10 @@ def regular_strain_large_strain_centred( positions, displacements, neighbourhood
                     print "\tLinAlgError: A", A
                     strain[ z, y, x, :, : ] = numpy.zeros( (3,3) ) * numpy.nan
                     rot[ z, y, x, :, : ]    = numpy.zeros( (3,3) ) * numpy.nan
+                    volStrain[ z, y, x ] = numpy.nan
 
 
   try: logging.log.info("regular_strain_large_strain_centered(): strain calculation done.")
   except: print "regular_strain_large_strain_centered(): strain calculation done."
   
-  return [ strain, rot, connectivity ]
+  return [ strain, rot, connectivity, volStrain]
