@@ -265,10 +265,7 @@ def process_results(  kinematics, data ):
                                                                             #3*strain_components['yx']**2 + 3*strain_components['zx']**2 + 3*strain_components['zy']**2 )
                                                                             12*strain_components['yx']**2 + 12*strain_components['zx']**2 + 12*strain_components['zy']**2 )
         else:
-            #OS: 17-10-18 no idea for the coefficients in 2D, sorry
-            strain_components['maximum_shear']  = ( 1/3.0 ) * numpy.sqrt( 2*(strain_components['xx']-strain_components['yy'] )**2  +  \
-                                                                            #3*strain_components['yx']**2 + 3*strain_components['zx']**2 + 3*strain_components['zy']**2 )
-                                                                            12*strain_components['yx']**2 )
+            strain_components['maximum_shear']  = ( 1/2.0 ) * numpy.sqrt( (strain_components['xx']-strain_components['yy'] )**2  +  4*strain_components['yx']**2 )
 
         ############################################
         # 0S: 17-10-18:
