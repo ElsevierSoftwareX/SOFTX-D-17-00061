@@ -5,7 +5,7 @@ DIR_out = './examples/3D/Results'
 
 search_window = [[-3, 2], [-7, 1], [-8, 2]]
 correlation_window = [2, 2, 2]
-node_spacing = [50, 50, 50]
+node_spacing = [10, 10, 10]
 
 image_format = 'TIFF'
 image_1_filter = 'Intact'
