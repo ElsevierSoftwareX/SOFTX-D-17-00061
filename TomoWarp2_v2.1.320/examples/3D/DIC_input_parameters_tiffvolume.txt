@@ -1,0 +1,19 @@
+Advanced = 1
+DIR_image1 = './examples/3D'
+DIR_image2 = './examples/3D'
+DIR_out = './examples/3D/Results'
+
+search_window = [[-3, 2], [-7, 1], [-8, 2]]
+correlation_window = [2, 2, 2]
+node_spacing = [50, 50, 50]
+
+image_format = 'TIFF'
+image_1_filter = 'Intact'
+image_2_filter = 'Deformed'
+image_ext = '\.[Tt][iI][Ff]{1,2}'
+
+output_name = 'DIC_advanced'
+
+grey_low_threshold = 70.0
+
+kinematics_median_filter = 3
