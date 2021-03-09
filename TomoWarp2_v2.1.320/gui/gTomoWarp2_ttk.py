@@ -27,7 +27,7 @@
 #!/usr/bin/env python
 
 
-import os, sys
+import os, sys, platform
 from os.path import expanduser
 from Tkinter import *
 import Tkconstants, tkFileDialog, tkMessageBox, ttk
@@ -142,11 +142,19 @@ def logSetup( root ):
 def buildGUI(inputfile=None, data={}):
     #Main function that creates the window with all the buttons and tabs
     
-    root = Tk()
+    root = Tk(className="TomoWarp2")
     root.title("TomoWarp2")
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
     root.grid_columnconfigure(1, weight=0)
+    
+    
+    if platform.system() == 'Windows':
+        root.wm_iconbitmap(default='%s/gui/TW2-icon.ico'%(sys.path[0]))
+    else:
+        iconfiles = ['%s/gui/TW2-icon%d%s' % (sys.path[0],size, '.gif') for size in (256, 128, 64, 48, 32, 16)]  
+        icons = [PhotoImage(file=iconfile) for iconfile in iconfiles]
+        root.call('wm', 'iconphoto', root._w, '-default', *icons)
     
     root.homeDir = expanduser( "~" )
 
