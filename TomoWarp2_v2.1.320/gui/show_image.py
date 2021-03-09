@@ -31,7 +31,7 @@ from colormap import Fire
 from tools.print_variable import pv
 import matplotlib.pyplot as plt
 
-VERBOSE=True
+VERBOSE=False
 
 class plot_component(Frame):
   """
@@ -55,14 +55,15 @@ class plot_component(Frame):
       #   according to the contrast
       if not (max_data - min_data) == 0:
         data = ( self.data_original - min_data ) / ( max_data - min_data ) * 254
-        data[numpy.where( data < 0   )] = 0
-        data[numpy.where( data > 254 )] = 254
+        with numpy.errstate(invalid='ignore'):
+            data[numpy.where( data < 0   )] = 0
+            data[numpy.where( data > 254 )] = 254
         data[numpy.where( numpy.isnan(data) )] = 255
       else:
         data = numpy.zeros_like(self.data_original)
      
       # Initialization of internal variables for dataMin and dataMax to update the image
-      #   when the values are change by the user
+      #   when the values are changed by the user
       self.dataMin = DoubleVar()
       self.dataMax = DoubleVar()
       self.dataMin.set(min_data)
@@ -124,7 +125,7 @@ class plot_component(Frame):
       self.dataMaxEntry = Entry(self, textvariable=self.dataMax, width=5)
       self.dataMinEntry.grid( row=currentRow, column=0, sticky=W, padx=5)
       self.dataMaxEntry.grid( row=currentRow, column=2, sticky=E, padx=5)
-     
+ 
       
   def built_im_tuple( self, data ):
       # tkinter wants a list of pixel where each item is a tk colour specification (e.g. "#120432").  
@@ -149,8 +150,9 @@ class plot_component(Frame):
       # Re-generate images value in range 0-255
       if not (max_data - min_data) == 0:
         new_data = ( self.data_original - min_data ) / ( max_data - min_data ) * 254
-        new_data[numpy.where( new_data < 0   )] = 0
-        new_data[numpy.where( new_data > 254 )] = 254
+        with numpy.errstate(invalid='ignore'):
+          new_data[numpy.where( new_data < 0   )] = 0
+          new_data[numpy.where( new_data > 254 )] = 254
         new_data[numpy.where( numpy.isnan( new_data ) )] = 255
       else:
         new_data = numpy.zeros_like(self.data_original)
