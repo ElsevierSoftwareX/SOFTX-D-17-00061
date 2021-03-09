@@ -71,8 +71,6 @@ def construct_mask( kinematics, cc_threshold=None ):
     mask[ numpy.where( kinematics[ :, 11 ] != 0 ) ] = numpy.inf
     mask[ numpy.where( kinematics[ :, 11 ] > 2 ) ] = numpy.nan
      
-    mask = numpy.zeros( cc_field.shape, dtype='<f4' )
-     
     return mask
 
 def process_results(  kinematics, data ):
@@ -262,7 +260,6 @@ def process_results(  kinematics, data ):
             strain_components['maximum_shear']  = ( 1/3.0 ) * numpy.sqrt( 2*( strain_components['xx']-strain_components['yy'] )**2  +  \
                                                                         2*( strain_components['xx']-strain_components['zz'] )**2  +  \
                                                                         2*( strain_components['yy']-strain_components['zz'] )**2  +  \
-                                                                            #3*strain_components['yx']**2 + 3*strain_components['zx']**2 + 3*strain_components['zy']**2 )
                                                                             12*strain_components['yx']**2 + 12*strain_components['zx']**2 + 12*strain_components['zy']**2 )
         else:
             strain_components['maximum_shear']  = ( 1/2.0 ) * numpy.sqrt( (strain_components['xx']-strain_components['yy'] )**2  +  4*strain_components['yx']**2 )
