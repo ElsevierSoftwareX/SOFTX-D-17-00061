@@ -202,7 +202,8 @@ def process_results(  kinematics, data ):
               cellType = 1
 
         elif  data.strain_mode == "tetrahedralStrains":
-            [ strain, rot, connectivity, coordinates ] = tetrahedral_elements_strain( kinematics[:,1:4], kinematics[:,4:7], mask = mask )
+            [ strain, rot, volStrain, connectivity, coordinates ] = tetrahedral_elements_strain( kinematics[:,1:4], kinematics[:,4:7], mask = mask )
+
             cellIndex = range(connectivity.shape[0])
             connectivity = numpy.searchsorted(numpy.where(numpy.isfinite(mask))[0],connectivity)
             cellType = 10   
@@ -224,7 +225,6 @@ def process_results(  kinematics, data ):
 
         ## Extract strain tensor components
         if len(strain.shape) == 5 :
-            strain_components['zz'] = numpy.array( strain[ :, :, :, 0, 0 ] )
             strain_components['zz'] = numpy.array( strain[ :, :, :, 0, 0 ] )
             strain_components['zy'] = numpy.array( strain[ :, :, :, 0, 1 ] )
             strain_components['zx'] = numpy.array( strain[ :, :, :, 0, 2 ] )

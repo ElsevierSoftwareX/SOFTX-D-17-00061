@@ -116,6 +116,7 @@ def tetrahedral_elements_strain( positions, displacements, connectivity = None, 
   #  2014-11-12 PB and EA: changing strain 6-component vector to a full 3x3 strain tensor
   strain = numpy.zeros( ( 0, 3, 3 ) )
   rot    = numpy.zeros( ( 0, 3, 3 ) )
+  volStrain = numpy.zeros( ( 0, 1 ) )
   new_connectivity =  numpy.zeros( ( 0, 4 ) ).astype('i')
   coordinates = numpy.zeros( ( 0, 3 ) )
 
@@ -125,7 +126,7 @@ def tetrahedral_elements_strain( positions, displacements, connectivity = None, 
     
         try:
           if (nElements-elementNumber)%int(nElements/100) == 0:
-              print  "\tCompleted cells %2.2f %%\r"%( 100*((nElements-elementNumber))/float(nElements) ),
+              print  "\tCompleted cells %2.0f %%\r"%( 100*((nElements-elementNumber))/float(nElements) ),
         except:
           pass
 
@@ -162,10 +163,14 @@ def tetrahedral_elements_strain( positions, displacements, connectivity = None, 
             # Call our strain "E"
             
             strain = numpy.append( strain, [E], axis=0  )
+
+            vol = numpy.array( [numpy.linalg.det( F ) - 1] )
             
-            new_connectivity = numpy.append( new_connectivity, [connectivity[ elementNumber ]], axis=0  )
+            volStrain = numpy.append( volStrain, [vol] , axis=0 )
+            
+            new_connectivity = numpy.append( new_connectivity, numpy.array( [connectivity[ elementNumber ]] ), axis=0  )
             ##Coordinates of the barycentre of the element
-            coordinates = numpy.append( coordinates, [numpy.mean( relNodePos, 0 )[[2,1,0]]], axis=0  )
+            coordinates = numpy.append( coordinates, numpy.array( [numpy.mean( relNodePos, 0 )[[2,1,0]]] ), axis=0  )
 
           except Exception as exc:
             flat_element += 1
@@ -175,4 +180,4 @@ def tetrahedral_elements_strain( positions, displacements, connectivity = None, 
   try: logging.log.info("tetrahedral_elements_strain: strain calculation done.")
   except: print "tetrahedral_elements_strain: strain calculation done."
 
-  return [ strain, rot, new_connectivity, coordinates ]
+  return [ strain, rot, volStrain, new_connectivity, coordinates ]
